@@ -1,0 +1,484 @@
+{
+  "info": {
+    "_postman_id": "a8f3b9c1-42e7-48f1-9c12-aero-senati-2026",
+    "name": "AERO-SENATI - API de Venta de Pasajes Aéreos",
+    "description": "Colección completa para la Evaluación Final Integral: Servicios Web (PDSD643).\nIncluye pruebas automatizadas de Status Code (200, 201, 400, 409), extracción dinámica del Token JWT, gestión de vuelos, pasajeros y reservas transaccionales con control de asientos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "codigo_pnr",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "id_reserva",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Autenticación (Auth)",
+      "item": [
+        {
+          "name": "Login como ROLE_ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Retorna Token JWT y Rol ADMIN\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.expect(jsonData.rol).to.eql('ROLE_ADMIN');",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login como ROLE_AGENTE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Retorna Token JWT y Rol AGENTE\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.expect(jsonData.rol).to.eql('ROLE_AGENTE');",
+                  "    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"agente1\",\n  \"password\": \"agente123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Login Inválido (401 Bad Credentials)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"clave_erronea\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Vuelos (Flights)",
+      "item": [
+        {
+          "name": "Listar Vuelos (Público - All)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Retorna lista de vuelos\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(Array.isArray(jsonData)).to.be.true;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/vuelos",
+              "host": ["{{base_url}}"],
+              "path": ["vuelos"]
+            }
+          }
+        },
+        {
+          "name": "Filtrar Vuelos por Origen y Destino",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/vuelos?origen=Lima&destino=Cusco",
+              "host": ["{{base_url}}"],
+              "path": ["vuelos"],
+              "query": [
+                { "key": "origen", "value": "Lima" },
+                { "key": "destino", "value": "Cusco" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear Vuelo (ROLE_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Vuelo creado con asientos disponibles\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.asientosDisponibles).to.eql(jsonData.capacidadAsientos);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroVuelo\": \"AV-9910\",\n  \"origen\": \"Lima\",\n  \"destino\": \"Trujillo\",\n  \"fechaSalida\": \"2026-12-01T10:00:00\",\n  \"fechaLlegada\": \"2026-12-01T11:15:00\",\n  \"precioBase\": 145.50,\n  \"capacidadAsientos\": 120,\n  \"idAerolinea\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vuelos",
+              "host": ["{{base_url}}"],
+              "path": ["vuelos"]
+            }
+          }
+        },
+        {
+          "name": "Crear Vuelo Inválido (400 Bad Request)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test(\"Retorna estructura uniforme de error\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql(400);",
+                  "    pm.expect(jsonData).to.have.property('detalles');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroVuelo\": \"\",\n  \"origen\": \"\",\n  \"destino\": \"\",\n  \"precioBase\": -10,\n  \"capacidadAsientos\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/vuelos",
+              "host": ["{{base_url}}"],
+              "path": ["vuelos"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Pasajeros (Passengers)",
+      "item": [
+        {
+          "name": "Registrar Pasajero (ROLE_AGENTE / ROLE_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Pasajero registrado correctamente\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.docIdentidad).to.eql(\"76543210\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombres\": \"Fernando\",\n  \"apellidos\": \"Salazar Vega\",\n  \"docIdentidad\": \"76543210\",\n  \"nacionalidad\": \"Peruana\",\n  \"telefono\": \"987112233\",\n  \"email\": \"fernando.salazar@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pasajeros",
+              "host": ["{{base_url}}"],
+              "path": ["pasajeros"]
+            }
+          }
+        },
+        {
+          "name": "Listar Pasajeros",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pasajeros",
+              "host": ["{{base_url}}"],
+              "path": ["pasajeros"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Reservas y Boletos (Bookings)",
+      "item": [
+        {
+          "name": "Registrar Reserva con Pasajes (Transaccional)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "pm.test(\"Genera Código PNR y Descuenta Asientos\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('codigoReserva');",
+                  "    pm.expect(jsonData.codigoReserva).to.match(/^PNR-[A-Z0-9]{6}$/);",
+                  "    pm.expect(jsonData.detalles.length).to.eql(2);",
+                  "    pm.collectionVariables.set(\"codigo_pnr\", jsonData.codigoReserva);",
+                  "    pm.collectionVariables.set(\"id_reserva\", jsonData.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPasajero\": 1,\n  \"idVuelo\": 1,\n  \"estadoPago\": \"PAGADO\",\n  \"detalles\": [\n    {\n      \"numeroAsiento\": \"12A\",\n      \"clase\": \"ECONOMICA\",\n      \"precioUnitario\": 189.90\n    },\n    {\n      \"numeroAsiento\": \"12B\",\n      \"clase\": \"ECONOMICA\",\n      \"precioUnitario\": 189.90\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/reservas",
+              "host": ["{{base_url}}"],
+              "path": ["reservas"]
+            }
+          }
+        },
+        {
+          "name": "Obtener Reserva Completa por Código PNR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Retorna datos completos con boletos individuales\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.codigoReserva).to.eql(pm.collectionVariables.get(\"codigo_pnr\"));",
+                  "    pm.expect(jsonData.detalles).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reservas/{{codigo_pnr}}",
+              "host": ["{{base_url}}"],
+              "path": ["reservas", "{{codigo_pnr}}"]
+            }
+          }
+        },
+        {
+          "name": "Listar Historial de Reservas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reservas",
+              "host": ["{{base_url}}"],
+              "path": ["reservas"]
+            }
+          }
+        },
+        {
+          "name": "Cancelar Reserva y Reponer Asientos (ROLE_ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Mensaje de confirmación de asientos repuestos\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.mensaje).to.include(\"cancelada exitosamente\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/reservas/{{id_reserva}}",
+              "host": ["{{base_url}}"],
+              "path": ["reservas", "{{id_reserva}}"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
