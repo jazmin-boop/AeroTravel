@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+    <action>
+        <actionName>run</actionName>
+        <packagings>
+            <packaging>jar</packaging>
+        </packagings>
+        <goals>
+            <goal>spring-boot:run</goal>
+        </goals>
+    </action>
+    <action>
+        <actionName>debug</actionName>
+        <packagings>
+            <packaging>jar</packaging>
+        </packagings>
+        <goals>
+            <goal>spring-boot:run</goal>
+        </goals>
+        <properties>
+            <spring-boot.run.jvmArguments>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</spring-boot.run.jvmArguments>
+            <jpda.listen>true</jpda.listen>
+        </properties>
+    </action>
+    <action>
+        <actionName>profile</actionName>
+        <packagings>
+            <packaging>jar</packaging>
+        </packagings>
+        <goals>
+            <goal>process-classes</goal>
+            <goal>org.codehaus.mojo:exec-maven-plugin:1.5.0:exec</goal>
+        </goals>
+        <properties>
+            <exec.args>-classpath %classpath com.aerosenati.AeroSenatiApplication</exec.args>
+            <exec.executable>java</exec.executable>
+        </properties>
+    </action>
+    <action>
+        <actionName>run.single.main</actionName>
+        <packagings>
+            <packaging>jar</packaging>
+        </packagings>
+        <goals>
+            <goal>spring-boot:run</goal>
+        </goals>
+        <properties>
+            <spring-boot.run.main-class>${packageClassName}</spring-boot.run.main-class>
+        </properties>
+    </action>
+</actions>
+

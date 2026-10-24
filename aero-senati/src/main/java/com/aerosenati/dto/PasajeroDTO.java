@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PasajeroDTO {
+
     private Integer id;
 
     @NotBlank(message = "El nombre es obligatorio")
@@ -30,4 +31,3 @@ public class PasajeroDTO {
     @Email(message = "El formato de correo electrónico no es válido")
     private String email;
 }
-

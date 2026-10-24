@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ErrorResponseDTO {
+
     private int status;
     private String error;
     private String mensaje;
@@ -22,4 +23,3 @@ public class ErrorResponseDTO {
     @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
 }
-
